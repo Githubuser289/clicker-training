@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 function App() {
   const workareaRef = useRef(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [buttonText, setButtonText] = useState("START");
+  const [startTime, setStartTime] = useState(null);
   const dimsRatio = 15 / 9;
   const colors = [
     "cadetblue",
@@ -39,8 +41,26 @@ function App() {
   };
 
   useEffect(() => {
-    updateDimensions(); // obtine dimensiunile la montare
+    updateDimensions(); // obține dimensiunile la prima randare (mount)
   }, []);
+
+  const finalMessage = () => {
+    const now = Date.now();
+    alert(
+      `Timpul trecut: ${((now - startTime) / 1000).toFixed(0)} secunde` +
+        `\nAi cules ${correctPicks} dintr-un total de ${totalMarkedDivs} dreptunghiuri` +
+        `\nAi facut clic gresit de ${wrongPicks} ori`
+    );
+  };
+  const handleButtonClick = () => {
+    if (buttonText === "START") {
+      setButtonText("STOP");
+      setStartTime(Date.now());
+    } else {
+      setButtonText("START");
+      finalMessage();
+    }
+  };
 
   const handleClick = (event) => {
     const clickedColor = event.target.style.backgroundColor;
@@ -105,12 +125,13 @@ function App() {
     <>
       <div className="controlbar">
         <div className="buttonbar">
-          <button className="mainbutton">START</button>
-          <button className="mainbutton">STOP</button>
+          <button className="mainbutton" onClick={handleButtonClick}>
+            {buttonText}
+          </button>
+          {/* {elapsedTime && <p>Timpul trecut: {elapsedTime} secunde</p>} */}
         </div>
         <div className="settings">
-          <p>Culoarea cautata este</p>
-
+          <p>Culoarea căutată este:</p>
           <div
             className="searchedColor"
             style={{ backgroundColor: srchColor }}
