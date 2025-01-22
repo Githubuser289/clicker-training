@@ -1,23 +1,127 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import "./App.css";
+import { useEffect, useRef, useState } from "react";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const workareaRef = useRef(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const dimsRatio = 15 / 9;
+  const colors = [
+    "cadetblue",
+    "cornflowerblue",
+    "crimson",
+    "darkmagenta",
+    "gold",
+    "hotpink",
+    "lightsalmon",
+    "olive",
+    "plum",
+    "silver",
+    "springgreen",
+    "yellowgreen",
+  ];
+  const workareaColor = "#414141";
+  let maxColumns = 8;
+  let srchColor = colors[Math.floor(Math.random() * maxColumns)];
+
+  let totalMarkedDivs = 0;
+  let correctPicks = 0;
+  let wrongPicks = 0;
+
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+  }
+  // obține dimensiunile div "workarea"
+  const updateDimensions = () => {
+    if (workareaRef.current) {
+      const rect = workareaRef.current.getBoundingClientRect();
+      setDimensions({ width: rect.width, height: rect.height });
+    }
+  };
+
+  useEffect(() => {
+    updateDimensions(); // obtine dimensiunile la montare
+  }, []);
+
+  const handleClick = (event) => {
+    const clickedColor = event.target.style.backgroundColor;
+    const clickedDiv = event.target.getAttribute("data-index");
+    if (clickedDiv !== null) {
+      if (clickedColor === srchColor) {
+        correctPicks = correctPicks + 1;
+        event.target.style.backgroundColor = workareaColor;
+      } else {
+        wrongPicks = wrongPicks + 1;
+      }
+      console.log(
+        `Utilizatorul a făcut clic pe div-ul cu indexul: ${clickedDiv}`
+      );
+      console.log(
+        "correctPicks=",
+        correctPicks,
+        "  totalMarkedDivs=",
+        totalMarkedDivs,
+        " wrongPicks=",
+        wrongPicks
+      );
+    }
+  };
+
+  const generateDivs = () => {
+    var elemWidth = Math.floor(dimensions.width / maxColumns);
+    var elemHeight = Math.floor(elemWidth / dimsRatio);
+
+    const cols = Math.floor(dimensions.width / elemWidth);
+    const rows = Math.floor(dimensions.height / elemHeight);
+
+    elemHeight = elemHeight - 5;
+    elemWidth = elemWidth - 10;
+
+    return Array.from({ length: rows }).map((_, rowIndex) => (
+      <div key={rowIndex} className="rowdiv">
+        {Array.from({ length: cols }).map((_, colIndex) => {
+          const divIndex = rowIndex * cols + colIndex;
+          const divColor = colors[getRandomInt(cols)];
+          if (divColor === srchColor) {
+            totalMarkedDivs = totalMarkedDivs + 1;
+          }
+          return (
+            <div
+              key={divIndex}
+              data-index={divIndex}
+              className="inner-div"
+              style={{
+                width: `${elemWidth}px`,
+                height: `${elemHeight}px`,
+                backgroundColor: divColor,
+              }}
+            ></div>
+          );
+        })}
+      </div>
+    ));
+  };
 
   return (
     <>
-      <h1>proiect sablon Vite + React pe GitHub pages</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
+      <div className="controlbar">
+        <div className="buttonbar">
+          <button className="mainbutton">START</button>
+          <button className="mainbutton">STOP</button>
+        </div>
+        <div className="settings">
+          <p>Culoarea cautata este</p>
 
+          <div
+            className="searchedColor"
+            style={{ backgroundColor: srchColor }}
+          ></div>
+        </div>
       </div>
-
+      <div className="workarea" ref={workareaRef} onClick={handleClick}>
+        {generateDivs()}
+      </div>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
